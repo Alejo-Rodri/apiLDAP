@@ -1,0 +1,7 @@
+{
+    "require": {
+        "ext-ldap": "*",
+        "ext-mail": "*",
+        "vlucas/phpdotenv": "^5.6"
+    }
+}

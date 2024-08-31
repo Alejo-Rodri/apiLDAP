@@ -1,5 +1,10 @@
 <?php
-$wsdl = "http://localhost/apiphp/api_service.wsdl";
+require 'vendor/autoload.php';
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+
+$wsdl = $_ENV['SOAP_WSDL'];
 
 $client = new SoapClient($wsdl);
 

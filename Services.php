@@ -1,19 +1,15 @@
 <?php
 class Services
 {
-    const URL = "ldap://192.168.1.45:389";
-    const ROOT = "dc=upb,dc=company";
-    const DN = "cn=admin,dc=upb,dc=company";
-    const PASSWD = "fungi";
     public $ldap_connection;
 
     public function __construct()
     {
-        $this->ldap_connection = ldap_connect(self::URL);
+        $this->ldap_connection = ldap_connect($_ENV['LDAP_URL']);
 
         ldap_set_option($this->ldap_connection, LDAP_OPT_PROTOCOL_VERSION, 3);
 
-        $ldap_bind = ldap_bind($this->ldap_connection, self::DN, self::PASSWD);
+        $ldap_bind = ldap_bind($this->ldap_connection, $_ENV['LDAP_ADMIN_DN'], $_ENV['LDAP_ADMIN_PASSWORD']);
 
         if ($ldap_bind) echo "Connected and bound to the LDAP server.";
         else echo "Unable to connect or bind to the LDAP server.";
@@ -23,7 +19,7 @@ class Services
 
     public function authenticate($uid, $psswd)
     {
-        $user_dn = "uid=" . $uid . ",ou=users," . self::ROOT;
+        $user_dn = "uid=" . $uid . "," . $_ENV['LDAP_OU'] . "," . $_ENV['LDAP_ROOT_DN'];
 
         if (ldap_bind($this->ldap_connection, $user_dn, $psswd)) $toReturn = "200";
         else $toReturn = "404";
@@ -37,7 +33,7 @@ class Services
     {
         $hashedPassword = "{SHA}" . base64_encode(pack("H*", sha1($psswd)));
 
-        $dn = "uid=" . $uid . ",ou=users," . self::ROOT;
+        $dn = "uid=" . $uid . "," . $_ENV['LDAP_OU'] . "," . $_ENV['LDAP_ROOT_DN'];
         $attributes = array(
             "cn" => $cn,
             "sn" => $sn,
@@ -62,7 +58,7 @@ class Services
 
     public function readEntry($uid)
     {
-        $dn = "uid=" . $uid . ",ou=users," . self::ROOT;
+        $dn = "uid=" . $uid . "," . $_ENV['LDAP_OU'] . "," . $_ENV['LDAP_ROOT_DN'];
         $filter = "(objectclass=*)";
         $attributes = array("cn", "sn", "mail");
 
@@ -83,7 +79,7 @@ class Services
     {
         $hashedPassword = "{SHA}" . base64_encode(pack("H*", sha1($psswd)));
 
-        $dn = "uid=" . $uid . ",ou=users," . self::ROOT;
+        $dn = "uid=" . $uid . "," . $_ENV['LDAP_OU'] . "," . $_ENV['LDAP_ROOT_DN'];
         $attributes = array(
             "userPassword" => $hashedPassword
         );
@@ -96,7 +92,7 @@ class Services
 
     public function deleteEntry($uid)
     {
-        $dn = "uid=" . $uid . ",ou=users," . self::ROOT;
+        $dn = "uid=" . $uid . "," . $_ENV['LDAP_OU'] . "," . $_ENV['LDAP_ROOT_DN'];
 
         if (ldap_delete($this->ldap_connection, $dn)) $toReturn = "200";
         else $toReturn="404";
