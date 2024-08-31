@@ -46,7 +46,15 @@ class Services
             "objectClass" => array("top", "shadowAccount", "inetOrgPerson")
         );
 
-        if (ldap_add($this->ldap_connection, $dn, $attributes)) $toReturn = "200";
+        if (ldap_add($this->ldap_connection, $dn, $attributes)) {
+            $toReturn = "200";
+            $subject="TestMail";
+            $message="Hola ".$uid." nos alegra que hagas parte de esta gran aventura que es NEXUS BATTLE III";
+            $headers='From: NEXUSBATTLEIII@upb.company.com'."\r\n".'Reply-To: adrox148@gmail.com';
+
+            if (mail($mail, $subject, $message, $headers)) echo "pos si sirvío";
+            else echo "paila manito";
+        }
         else $toReturn = "404";
         
         return $toReturn;
