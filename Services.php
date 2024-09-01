@@ -1,7 +1,12 @@
 <?php
+include './services/CreateOp.php';
+include './services/ReadOp.php';
+include './services/UpdateOp.php';
+include './services/DeleteOp.php';
+
 class Services
 {
-    public $ldap_connection;
+    private $ldap_connection;
 
     public function __construct()
     {
@@ -31,73 +36,27 @@ class Services
 
     public function createEntry($uid, $cn, $sn, $mail, $psswd)
     {
-        $hashedPassword = "{SHA}" . base64_encode(pack("H*", sha1($psswd)));
-
-        $dn = "uid=" . $uid . "," . $_ENV['LDAP_OU'] . "," . $_ENV['LDAP_ROOT_DN'];
-        $attributes = array(
-            "cn" => $cn,
-            "sn" => $sn,
-            "mail" => $mail,
-            "userPassword" => $hashedPassword,
-            "objectClass" => array("top", "shadowAccount", "inetOrgPerson")
-        );
-
-        if (ldap_add($this->ldap_connection, $dn, $attributes)) {
-            $toReturn = "200";
-            $subject="TestMail";
-            $message="Hola ".$uid." nos alegra que hagas parte de esta gran aventura que es NEXUS BATTLE III";
-            $headers='From: NEXUSBATTLEIII@upb.company.com'."\r\n".'Reply-To: adrox148@gmail.com';
-
-            if (mail($mail, $subject, $message, $headers)) echo "pos si sirvío";
-            else echo "paila manito";
-        }
-        else $toReturn = "404";
-        
-        return $toReturn;
+        $client = new CreateOp();
+        return $client->addUser(uid: $uid, cn: $cn, sn: $sn, mail: $mail, 
+                                psswd: $psswd, ldap_connection: $this->ldap_connection);
     }
 
     public function readEntry($uid)
     {
-        $dn = "uid=" . $uid . "," . $_ENV['LDAP_OU'] . "," . $_ENV['LDAP_ROOT_DN'];
-        $filter = "(objectclass=*)";
-        $attributes = array("cn", "sn", "mail");
-
-        $result = ldap_read($this->ldap_connection, $dn, $filter, $attributes);
-        if (!is_bool($result))
-        {
-            $entries = ldap_get_entries($this->ldap_connection, $result);
-            $toReturn = "200";
-        } else $toReturn = "404";
-        
-        return [
-            'status' => $toReturn,
-            'userAttributes' => $entries
-        ];
+        $client = new ReadOp();
+        return $client->getUser(uid: $uid, ldap_connection: $this->ldap_connection);
     }
 
     public function updatePassword($uid, $psswd)
     {
-        $hashedPassword = "{SHA}" . base64_encode(pack("H*", sha1($psswd)));
-
-        $dn = "uid=" . $uid . "," . $_ENV['LDAP_OU'] . "," . $_ENV['LDAP_ROOT_DN'];
-        $attributes = array(
-            "userPassword" => $hashedPassword
-        );
-
-        if (ldap_modify($this->ldap_connection, $dn, $attributes)) $toReturn = "200";
-        else $toReturn="404";
-
-        return $toReturn;
+        $client = new UpdateOp();
+        return $client->updatePassword(uid: $uid, psswd: $psswd, ldap_connection: $this->ldap_connection);
     }
 
     public function deleteEntry($uid)
     {
-        $dn = "uid=" . $uid . "," . $_ENV['LDAP_OU'] . "," . $_ENV['LDAP_ROOT_DN'];
-
-        if (ldap_delete($this->ldap_connection, $dn)) $toReturn = "200";
-        else $toReturn="404";
-
-        return $toReturn;
+        $client = new DeleteOp();
+        return $client->deleteUser(uid: $uid, ldap_connection: $this->ldap_connection);
     }
 
     public function closeConnection()

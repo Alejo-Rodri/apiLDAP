@@ -141,7 +141,7 @@
 
     <wsdl:service name="ApiService">
         <wsdl:port name="CrudPort" binding="tns:CrudBinding">
-            <soap:address location="http://localhost/apiphp/soap-server.php"/>
+            <soap:address location="http://localhost/apildap/SoapServer.php"/>
         </wsdl:port>
     </wsdl:service>
     
