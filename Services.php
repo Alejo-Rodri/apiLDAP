@@ -4,6 +4,9 @@ include './services/ReadOp.php';
 include './services/UpdateOp.php';
 include './services/DeleteOp.php';
 
+/**
+ * @OA\Info(title="LDAP API Service", version="1.0.0")
+ */
 class Services
 {
     private $ldap_connection;
@@ -41,6 +44,34 @@ class Services
                                 psswd: $psswd, ldap_connection: $this->ldap_connection);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/readEntry",
+     *     summary="Read an LDAP entry",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/xml",
+     *             @OA\Schema(
+     *                 type="object",
+     *                 @OA\Property(property="uid", type="string")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Entry read successfully",
+     *         @OA\MediaType(
+     *             mediaType="application/xml",
+     *             @OA\Schema(
+     *                 type="object",
+     *                 @OA\Property(property="status", type="string"),
+     *                 @OA\Property(property="userAttributes", type="array", @OA\Items(type="string"))
+     *             )
+     *         )
+     *     )
+     * )
+     */
     public function readEntry($uid)
     {
         $client = new ReadOp();
