@@ -1,8 +1,11 @@
 <?php
 class ReadOp
 {
-    public function getUser($uid, $ldap_connection)
+    public function getUserById($uid)
     {
+        $db = new Database();
+        $ldap_connection = $db->getConnection();
+
         $dn = "uid=" . $uid . "," . $_ENV['LDAP_OU'] . "," . $_ENV['LDAP_ROOT_DN'];
         $filter = "(objectclass=*)";
         $attributes = array("cn", "sn", "mail");
@@ -11,13 +14,9 @@ class ReadOp
         if (!is_bool($result))
         {
             $entries = ldap_get_entries($ldap_connection, $result);
-            $toReturn = "200";
-        } else $toReturn = "404";
-        
-        return [
-            'status' => $toReturn,
-            'userAttributes' => $entries
-        ];
+            echo json_encode($entries);
+            header('HTTP/1.1 201 OK');
+        } else header('HTTP/1.1 404 NOT OK');
     }
 }
 ?>
